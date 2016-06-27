@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -49,7 +50,6 @@ public class QuovaResponseTest {
 		for(int i=0; i<ips.size(); i++) {
 			testcases.put(ips.get(i), (ArrayList<String>) values.get(i));
 		}
-		System.out.println(testcases.size());
 	}
 	
 	@Test
@@ -62,7 +62,7 @@ public class QuovaResponseTest {
 				fail("Got HwIP_GeoException");
 			}
 			ArrayList<String> expected = testcases.get(ips.get(i));
-			assertEquals(expected.get(0), "sff");
+			assertEquals(expected.get(0), response.getCityName());
 			assertEquals(expected.get(1), response.getStateName());
 			assertEquals(expected.get(2), response.getCountryCode());
 			assertEquals(expected.get(3), response.getZipCode());
@@ -74,5 +74,28 @@ public class QuovaResponseTest {
 			assertEquals(expected.get(9), String.valueOf(response.getNDMA_Code()));
 
 		}
+	}
+	
+	@Test(expected = HwIP_GeoException.class)
+	public void testEmptyIP() throws HwIP_GeoException {
+		q.lookup("");
+	}
+	
+	@Test(expected = HwIP_GeoException.class)
+	public void testInvalidIP() throws HwIP_GeoException {
+		q.lookup("1.2.a.3");
+	}
+	
+	@Test
+	public void testNullResponse() {
+		try {
+			response = q.lookup("172.17.29.112");
+		} catch (HwIP_GeoException e) {
+			fail("Got HwIP_GeoException");
+		}
+		Assert.assertNull(response.getCityName());
+		Assert.assertNull(response.getStateName());
+		Assert.assertNull(response.getCountryCode());
+		Assert.assertNull(response.getZipCode());
 	}
 }
